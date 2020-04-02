@@ -80,14 +80,14 @@ func (l *List) IsEmpty() bool {
 }
 
 // Tail returns the last node of the list.
-// The last node can be null (using *ListNode.IsNull to test)
+// The last node may be null (using *ListNode.IsNull to test)
 // when the list is empty.
 func (l *List) Tail() *ListNode {
 	return l.nil.prev
 }
 
 // Head returns the first node of the list.
-// The first node can be null (using *ListNode.IsNull to test)
+// The first node may be null (using *ListNode.IsNull to test)
 // when the list is empty.
 func (l *List) Head() *ListNode {
 	return l.nil.next
@@ -140,7 +140,7 @@ func (ln *ListNode) IsReset() bool {
 
 // Prev returns the previous node of the node.
 // The node must be not null.
-// The previous node can be null (using *ListNode.IsNull to test)
+// The previous node may be null (using *ListNode.IsNull to test)
 // when the node is at the beginning of a list.
 func (ln *ListNode) Prev() *ListNode {
 	return ln.prev
@@ -148,7 +148,7 @@ func (ln *ListNode) Prev() *ListNode {
 
 // Next returns the next node of the node.
 // The node must be not null.
-// The next node can be null (using *ListNode.IsNull to test)
+// The next node may be null (using *ListNode.IsNull to test)
 // when the node is at the end of a list.
 func (ln *ListNode) Next() *ListNode {
 	return ln.next
