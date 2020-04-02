@@ -61,17 +61,13 @@ func (l *List) PrependSlice(firstNode *ListNode, lastNode *ListNode) {
 
 // GetNodes returns an iterator over all nodes of the list in order.
 func (l *List) GetNodes() ListIterator {
-	iterator := forwardListIterator{}
-	iterator.init(l)
-	return &iterator
+	return new(forwardListIterator).Init(l)
 }
 
 // GetReverseNodes returns an iterator over all nodes of the list in
 // reverse order.
 func (l *List) GetReverseNodes() ListIterator {
-	iterator := backwardListIterator{}
-	iterator.init(l)
-	return &iterator
+	return new(backwardListIterator).Init(l)
 }
 
 // IsEmpty indicates whether the list is empty.
@@ -207,10 +203,11 @@ type forwardListIterator struct {
 
 var _ = (ListIterator)((*forwardListIterator)(nil))
 
-func (fli *forwardListIterator) init(l *List) {
+func (fli *forwardListIterator) Init(l *List) *forwardListIterator {
 	fli.l = l
 	fli.node = l.Head()
 	fli.nextNode = fli.node.Next()
+	return fli
 }
 
 func (fli *forwardListIterator) Advance() {
@@ -223,10 +220,11 @@ type backwardListIterator struct {
 
 var _ = (ListIterator)((*backwardListIterator)(nil))
 
-func (bli *backwardListIterator) init(l *List) {
+func (bli *backwardListIterator) Init(l *List) *backwardListIterator {
 	bli.l = l
 	bli.node = l.Tail()
 	bli.nextNode = bli.node.Prev()
+	return bli
 }
 
 func (bli *backwardListIterator) Advance() {

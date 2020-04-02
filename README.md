@@ -4,6 +4,8 @@
 
 Intrusive containers for Go
 
+- [List](#list)
+
 ## List
 
 An implement of intrusive doubly-linked lists.
