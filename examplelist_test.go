@@ -34,7 +34,6 @@ func ExampleList() {
 		r := (*Record)(it.Node().GetContainer(unsafe.Offsetof(Record{}.ListNode)))
 		fmt.Printf("%v,", r.Value)
 	}
-
 	fmt.Println("")
 
 	l.Head().Remove()
@@ -42,13 +41,12 @@ func ExampleList() {
 	rs[2].ListNode.Remove()
 	rs[0].ListNode.Remove()
 
-	for it := l.GetNodes(); !it.IsAtEnd(); it.Advance() {
+	for it := l.GetReverseNodes(); !it.IsAtEnd(); it.Advance() {
 		r := (*Record)(it.Node().GetContainer(unsafe.Offsetof(Record{}.ListNode)))
 		fmt.Printf("%v,", r.Value)
 	}
-
 	fmt.Println("")
 	// Output:
 	// 4,3,2,0,1,5,
-	// 3,1,
+	// 1,3,
 }

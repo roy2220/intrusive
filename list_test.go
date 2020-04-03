@@ -181,6 +181,7 @@ func dumpRecordList(it intrusive.ListIterator) string {
 	buffer := bytes.NewBuffer(nil)
 
 	for ; !it.IsAtEnd(); it.Advance() {
+		*it.Node() = intrusive.ListNode{} // destry the list
 		record := (*recordOfList)(it.Node().GetContainer(unsafe.Offsetof(recordOfList{}.ListNode)))
 		fmt.Fprintf(buffer, "%v,", record.Value)
 	}

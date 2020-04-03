@@ -14,13 +14,13 @@ func (l *List) Init() *List {
 }
 
 // AppendNode inserts the given node at the end of the list.
-// The given node must be not null and detatched from any list.
+// The given node must be not null.
 func (l *List) AppendNode(node *ListNode) {
 	node.insert(l.Tail(), &l.nil)
 }
 
 // PrependNode inserts the given node at the beginning of the list.
-// The given node must be not null and detatched from any list.
+// The given node must be not null.
 func (l *List) PrependNode(node *ListNode) {
 	node.insert(&l.nil, l.Head())
 }
@@ -48,13 +48,13 @@ func (l *List) PrependNodes(other *List) {
 }
 
 // AppendSlice inserts the given slice at the end of the list.
-// The given slice must be not null and detatched from any list.
+// The given slice must not contain null node.
 func (l *List) AppendSlice(firstNode *ListNode, lastNode *ListNode) {
 	insertListSlice(firstNode, lastNode, l.Tail(), &l.nil)
 }
 
 // PrependSlice inserts the given slice at the beginning of the list.
-// The given slice must be not null and detatched from any list.
+// The given slice must not contain null node.
 func (l *List) PrependSlice(firstNode *ListNode, lastNode *ListNode) {
 	insertListSlice(firstNode, lastNode, &l.nil, l.Head())
 }
@@ -95,7 +95,6 @@ type ListNode struct {
 }
 
 // InsertBefore inserts the node before the given other node.
-// The node must be not null and detatched from any list.
 // Inserting the node before a null node is legal as if inserting
 // at the end of a list.
 func (ln *ListNode) InsertBefore(other *ListNode) {
@@ -103,7 +102,6 @@ func (ln *ListNode) InsertBefore(other *ListNode) {
 }
 
 // InsertAfter inserts the node after the given other node.
-// The node must be not null and detatched from any list.
 // Inserting the node after a null node is legal as if inserting
 // at the beginning of a list.
 func (ln *ListNode) InsertAfter(other *ListNode) {
@@ -111,7 +109,7 @@ func (ln *ListNode) InsertAfter(other *ListNode) {
 }
 
 // Remove removes the node from a list.
-// The node must be not null and attached to a list.
+// The node must be in a list.
 func (ln *ListNode) Remove() {
 	ln.prev.setNext(ln.next)
 }
@@ -129,21 +127,23 @@ func (ln *ListNode) IsNull(l *List) bool {
 	return ln == &l.nil
 }
 
-// IsReset indicates whether the node is reset (to a zero value).
+// IsReset indicates whether the node is reset (with a zero value).
 func (ln *ListNode) IsReset() bool {
 	return ln.prev == nil
 }
 
-// Prev returns the previous node of the node.
-// The node must be not null.
+// Prev returns the previous node to the node.
+// Retrieving previous node to a null node is legal as if
+// retrieving the tail of a list.
 // The previous node may be null (using *ListNode.IsNull to test)
 // when the node is at the beginning of a list.
 func (ln *ListNode) Prev() *ListNode {
 	return ln.prev
 }
 
-// Next returns the next node of the node.
-// The node must be not null.
+// Next returns the next node to the node.
+// Retrieving the next node to a null node is legal as if
+// retrieving the head of a list.
 // The next node may be null (using *ListNode.IsNull to test)
 // when the node is at the end of a list.
 func (ln *ListNode) Next() *ListNode {
@@ -171,6 +171,10 @@ type ListIterator interface {
 	IsAtEnd() bool
 
 	// Node returns the current node in the iteration.
+	// It's safe to erase the current node for the next node
+	// to advance to is pre-cached. That will be useful to
+	// destroy the entire list while iterating through the
+	// list.
 	Node() *ListNode
 
 	// Advance advances the iteration to the next node.
@@ -178,21 +182,23 @@ type ListIterator interface {
 }
 
 // InsertListSliceBefore inserts the given slice before given list node.
-// The given slice must be not null and detached from any list.
-// The given node must be not null and attached to a list.
+// Inserting the given slice before a null node is legal as if inserting
+// at the end of a list.
+// The given node must be in a list.
 func InsertListSliceBefore(firstListNode *ListNode, lastListNode *ListNode, listNode *ListNode) {
 	insertListSlice(firstListNode, lastListNode, listNode.prev, listNode)
 }
 
 // InsertListSliceAfter inserts the given slice after given list node.
-// The given slice must be not null and detached from any list.
-// The given node must be not null and attached to a list.
+// Inserting the given slice after a null node is legal as if inserting
+// at the beginning of a list.
+// The given node must be in a list.
 func InsertListSliceAfter(firstListNode *ListNode, lastListNode *ListNode, listNode *ListNode) {
 	insertListSlice(firstListNode, lastListNode, listNode, listNode.next)
 }
 
 // RemoveListSlice removes the given slice from a list.
-// The given slice must be not null and attached to a list.
+// The given slice must be in a list.
 func RemoveListSlice(firstListNode *ListNode, lastListNode *ListNode) {
 	firstListNode.prev.setNext(lastListNode.next)
 }
