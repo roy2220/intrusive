@@ -45,8 +45,8 @@ func ExampleRBTree() {
 	fmt.Println("")
 
 	for _, v := range []int{1, 4, 1, 99, 3} {
-		rbtn := rbt.FindNode(v)
-		if rbtn != nil {
+		rbtn, ok := rbt.FindNode(v)
+		if ok {
 			rbt.RemoveNode(rbtn)
 		}
 	}

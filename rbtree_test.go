@@ -45,11 +45,12 @@ func TestRBTreeInsertNode(t *testing.T) {
 	} {
 		rbt := new(intrusive.RBTree).Init(orderRBTreeNodeOfRecord, compareRBTreeNodeOfRecrod)
 		assert.True(t, rbt.IsEmpty())
-		assert.Nil(t, rbt.GetRoot())
+		_, ok := rbt.GetRoot()
+		assert.False(t, ok)
 		for _, v := range tt.In {
 			rbt.InsertNode(&(&recordOfRBTree{Value: v}).RBTreeNode)
 		}
-		var it intrusive.RBTreeIterator
+		var it intrusive.Iterator
 		if tt.OutIsReverse {
 			it = rbt.GetReverseNodes()
 		} else {
@@ -114,12 +115,13 @@ func TestRBTreeRemoveNode(t *testing.T) {
 			rbt.InsertNode(&r.RBTreeNode)
 		}
 		assert.False(t, rbt.IsEmpty())
-		assert.NotNil(t, rbt.GetRoot())
+		_, ok := rbt.GetRoot()
+		assert.True(t, ok)
 		for _, v := range tt.In {
 			r := &rs[v-1]
 			rbt.RemoveNode(&r.RBTreeNode)
 		}
-		var it intrusive.RBTreeIterator
+		var it intrusive.Iterator
 		if tt.OutIsReverse {
 			it = rbt.GetReverseNodes()
 		} else {
@@ -155,14 +157,17 @@ func TestRBTreeFindNode(t *testing.T) {
 			rbt.InsertNode(&r.RBTreeNode)
 		}
 		assert.False(t, rbt.IsEmpty())
-		assert.NotNil(t, rbt.GetRoot())
+		_, ok := rbt.GetRoot()
+		assert.True(t, ok)
 		out := make([]bool, len(tt.In))
 		for i, v := range tt.In {
+			rbtn, ok := rbt.FindNode(v)
+
 			if v < 1 || v > len(rs) {
-				out[i] = rbt.FindNode(v) != nil
+				out[i] = ok
 			} else {
 				r := &rs[v-1]
-				out[i] = rbt.FindNode(v) == &r.RBTreeNode
+				out[i] = ok && rbtn == &r.RBTreeNode
 			}
 		}
 		assert.Equal(t, tt.Out, out, "case %d", i)
@@ -171,26 +176,36 @@ func TestRBTreeFindNode(t *testing.T) {
 
 func TestRBTreeGetMinMaxNodeGetPrevNext(t *testing.T) {
 	rbt := new(intrusive.RBTree).Init(orderRBTreeNodeOfRecord, compareRBTreeNodeOfRecrod)
-	assert.Nil(t, rbt.GetMin())
-	assert.Nil(t, rbt.GetMax())
+	_, ok := rbt.GetMin()
+	assert.False(t, ok)
+	_, ok = rbt.GetMax()
+	assert.False(t, ok)
 	rs := [100]recordOfRBTree{}
 	for i := range rs {
 		r := &rs[i]
 		r.Value = i + 1
 		rbt.InsertNode(&r.RBTreeNode)
 	}
-	assert.Nil(t, rbt.GetMin().GetPrev(rbt))
-	assert.NotNil(t, rbt.GetMin().GetNext(rbt))
-	assert.Nil(t, rbt.GetMax().GetNext(rbt))
-	assert.NotNil(t, rbt.GetMax().GetPrev(rbt))
+	if min, ok := rbt.GetMin(); assert.True(t, ok) {
+		_, ok = min.GetPrev(rbt)
+		assert.False(t, ok)
+		_, ok = min.GetNext(rbt)
+		assert.True(t, ok)
+	}
+	if max, ok := rbt.GetMax(); assert.True(t, ok) {
+		_, ok = max.GetNext(rbt)
+		assert.False(t, ok)
+		_, ok = max.GetPrev(rbt)
+		assert.True(t, ok)
+	}
 	i := 0
-	for rbtn := rbt.GetMin(); rbtn != nil; rbtn = rbtn.GetNext(rbt) {
+	for rbtn, ok := rbt.GetMin(); ok; rbtn, ok = rbtn.GetNext(rbt) {
 		assert.Equal(t, &rs[i].RBTreeNode, rbtn)
 		i++
 	}
 	assert.Equal(t, len(rs), i)
 	i = len(rs) - 1
-	for rbtn := rbt.GetMax(); rbtn != nil; rbtn = rbtn.GetPrev(rbt) {
+	for rbtn, ok := rbt.GetMax(); ok; rbtn, ok = rbtn.GetPrev(rbt) {
 		assert.Equal(t, &rs[i].RBTreeNode, rbtn)
 		i--
 	}
@@ -226,8 +241,10 @@ func TestRBTree(t *testing.T) {
 	}
 	for i := range rs {
 		r := &rs[i]
-		rbtn := rbt.FindNode(r.Value)
-		assert.Equal(t, &r.RBTreeNode, rbtn)
+		rbtn, ok := rbt.FindNode(r.Value)
+		if assert.True(t, ok) {
+			assert.Equal(t, &r.RBTreeNode, rbtn)
+		}
 	}
 	for i := range rs {
 		r := &rs[i]
@@ -250,12 +267,12 @@ func compareRBTreeNodeOfRecrod(node *intrusive.RBTreeNode, value interface{}) in
 	return int64((*recordOfRBTree)(node.GetContainer(unsafe.Offsetof(recordOfRBTree{}.RBTreeNode))).Value - value.(int))
 }
 
-func dumpRecordRBTree(it intrusive.RBTreeIterator) string {
+func dumpRecordRBTree(it intrusive.Iterator) string {
 	buffer := bytes.NewBuffer(nil)
 
 	for ; !it.IsAtEnd(); it.Advance() {
-		*it.Node() = intrusive.RBTreeNode{} // destry the tree
 		record := (*recordOfRBTree)(it.Node().GetContainer(unsafe.Offsetof(recordOfRBTree{}.RBTreeNode)))
+		record.RBTreeNode = intrusive.RBTreeNode{} // destry the tree
 		fmt.Fprintf(buffer, "%v,", record.Value)
 	}
 

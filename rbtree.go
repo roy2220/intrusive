@@ -79,15 +79,15 @@ func (rbt *RBTree) RemoveNode(x *RBTreeNode) {
 
 // FindNode finds a node with the given key in the tree and
 // then returns the node.
-// If no node with an identical key exists, it returns nil.
-func (rbt *RBTree) FindNode(key interface{}) *RBTreeNode {
+// If no node with an identical key exists, it returns false.
+func (rbt *RBTree) FindNode(key interface{}) (*RBTreeNode, bool) {
 	x := rbt.root()
 
 	for !x.isNull(rbt) {
 		d := -rbt.nodeComparer(x, key)
 
 		if d == 0 {
-			return x
+			return x, true
 		}
 
 		if d < 0 {
@@ -97,44 +97,44 @@ func (rbt *RBTree) FindNode(key interface{}) *RBTreeNode {
 		}
 	}
 
-	return nil
+	return nil, false
 }
 
-// GetNodes returns an iterator over all nodes of the tree in order.
-func (rbt *RBTree) GetNodes() RBTreeIterator {
+// GetNodes returns an iterator over all nodes in the tree in order.
+func (rbt *RBTree) GetNodes() Iterator {
 	return new(forwardRBTreeIterator).Init(rbt)
 }
 
-// GetReverseNodes returns an iterator over all nodes of the tree in
+// GetReverseNodes returns an iterator over all nodes in the tree in
 // reverse order.
-func (rbt *RBTree) GetReverseNodes() RBTreeIterator {
+func (rbt *RBTree) GetReverseNodes() Iterator {
 	return new(backwardRBTreeIterator).Init(rbt)
 }
 
 // GetRoot returns the root of the tree.
-// If the tree is empty, it returns nil.
-func (rbt *RBTree) GetRoot() *RBTreeNode {
+// If the tree is empty, it returns false.
+func (rbt *RBTree) GetRoot() (*RBTreeNode, bool) {
 	if root := rbt.root(); !root.isNull(rbt) {
-		return root
+		return root, true
 	}
 
-	return nil
+	return nil, false
 }
 
 // GetMin returns the node with the minimum key in the tree.
-// If the tree is empty, it returns nil.
-func (rbt *RBTree) GetMin() *RBTreeNode {
+// If the tree is empty, it returns false.
+func (rbt *RBTree) GetMin() (*RBTreeNode, bool) {
 	x := rbt.root()
 
 	if x.isNull(rbt) {
-		return nil
+		return nil, false
 	}
 
 	for {
 		y := x.leftChild
 
 		if y.isNull(rbt) {
-			return x
+			return x, true
 		}
 
 		x = y
@@ -142,19 +142,19 @@ func (rbt *RBTree) GetMin() *RBTreeNode {
 }
 
 // GetMax returns the node with the maximum key in the tree.
-// If the tree is empty, it returns nil.
-func (rbt *RBTree) GetMax() *RBTreeNode {
+// If the tree is empty, it returns false.
+func (rbt *RBTree) GetMax() (*RBTreeNode, bool) {
 	x := rbt.root()
 
 	if x.isNull(rbt) {
-		return nil
+		return nil, false
 	}
 
 	for {
 		y := x.rightChild
 
 		if y.isNull(rbt) {
-			return x
+			return x, true
 		}
 
 		x = y
@@ -298,14 +298,14 @@ func (rbt *RBTree) root() *RBTreeNode {
 
 // RBTreeNodeOrderer is the type of a function indicating whether the
 // given node 1 is not greater than the given node 2.
-type RBTreeNodeOrderer func(node1 *RBTreeNode, node2 *RBTreeNode) bool
+type RBTreeNodeOrderer func(rbtn1 *RBTreeNode, rbtn2 *RBTreeNode) bool
 
 // RBTreeNodeComparer is the type of a function comparing the given node
 // with the given key, returning a integer:
 // with a value == 0 means the key of the node is equal to the given key;
 // with a value < 0 means the key of the node is less than the given key;
 // with a value > 0 means the key of the node is greater than the given key;
-type RBTreeNodeComparer func(node *RBTreeNode, key interface{}) int64
+type RBTreeNodeComparer func(rbtn *RBTreeNode, key interface{}) int64
 
 // RBTreeNode represents a node in a red-black tree.
 type RBTreeNode struct {
@@ -316,15 +316,15 @@ type RBTreeNode struct {
 }
 
 // GetPrev returns the previous node to the node.
-// The previous node may be nil when the key of the node is the
-// minimum key in the given tree.
-func (rbtn *RBTreeNode) GetPrev(rbt *RBTree) *RBTreeNode {
+// If the key of the node is the minimum key in the given tree,
+// it returns false.
+func (rbtn *RBTreeNode) GetPrev(rbt *RBTree) (*RBTreeNode, bool) {
 	if prev := rbtn.leftChild; !prev.isNull(rbt) {
 		for {
 			prevChild := prev.rightChild
 
 			if prevChild.isNull(rbt) {
-				return prev
+				return prev, true
 			}
 
 			prev = prevChild
@@ -336,11 +336,11 @@ func (rbtn *RBTreeNode) GetPrev(rbt *RBTree) *RBTreeNode {
 
 	for {
 		if prev.isNull(rbt) {
-			return nil
+			return nil, false
 		}
 
 		if prevChild == prev.rightChild {
-			return prev
+			return prev, true
 		}
 
 		prevChild = prev
@@ -349,15 +349,15 @@ func (rbtn *RBTreeNode) GetPrev(rbt *RBTree) *RBTreeNode {
 }
 
 // GetNext returns the next node to the node.
-// The next node may be nil when the key of the node is the
-// maximum key in the given tree.
-func (rbtn *RBTreeNode) GetNext(rbt *RBTree) *RBTreeNode {
+// If the key of the node is the maximum key in the given tree,
+// it returns false.
+func (rbtn *RBTreeNode) GetNext(rbt *RBTree) (*RBTreeNode, bool) {
 	if next := rbtn.rightChild; !next.isNull(rbt) {
 		for {
 			nextChild := next.leftChild
 
 			if nextChild.isNull(rbt) {
-				return next
+				return next, true
 			}
 
 			next = nextChild
@@ -369,11 +369,11 @@ func (rbtn *RBTreeNode) GetNext(rbt *RBTree) *RBTreeNode {
 
 	for {
 		if next.isNull(rbt) {
-			return nil
+			return nil, false
 		}
 
 		if nextChild == next.leftChild {
-			return next
+			return next, true
 		}
 
 		nextChild = next
@@ -382,7 +382,7 @@ func (rbtn *RBTreeNode) GetNext(rbt *RBTree) *RBTreeNode {
 }
 
 // GetContainer returns a pointer to the container which contains
-// the RBTreeNode field about the node.
+// the RBTreeNode field about the node at the given offset.
 func (rbtn *RBTreeNode) GetContainer(offset uintptr) unsafe.Pointer {
 	return unsafe.Pointer(uintptr(unsafe.Pointer(rbtn)) - offset)
 }
@@ -430,26 +430,12 @@ func (rbtn *RBTreeNode) isNull(rbt *RBTree) bool {
 	return rbtn == &rbt.nil
 }
 
-// RBTreeIterator represents an iteration over all nodes in a tree.
-type RBTreeIterator interface {
-	// IsAtEnd indicates whether the iteration has no more nodes.
-	IsAtEnd() bool
-
-	// Node returns the current node in the iteration.
-	// It's safe to erase the current node for the next node
-	// to advance to is pre-cached. That will be useful to
-	// destroy the entire tree while iterating through the
-	// tree.
-	Node() *RBTreeNode
-
-	// Advance advances the iteration to the next node.
-	Advance()
-}
-
 const (
 	rbTreeNodeRed = rbTreeNodeColor(iota)
 	rbTreeNodeBlack
 )
+
+const reservedRBTreeIteratorStackDepth = 64
 
 type rbTreeNodeColor int
 
@@ -457,11 +443,11 @@ type forwardRBTreeIterator struct {
 	rbTreeIterator
 }
 
-var _ = (RBTreeIterator)((*forwardRBTreeIterator)(nil))
+var _ = (Iterator)((*forwardRBTreeIterator)(nil))
 
 func (frbti *forwardRBTreeIterator) Init(rbt *RBTree) *forwardRBTreeIterator {
 	frbti.rbt = rbt
-	frbti.stack = make([][2]*RBTreeNode, 0, 64)
+	frbti.stack = make([][2]*RBTreeNode, 0, reservedRBTreeIteratorStackDepth)
 	frbti.populateStack(rbt, rbt.root())
 	return frbti
 }
@@ -481,11 +467,11 @@ type backwardRBTreeIterator struct {
 	rbTreeIterator
 }
 
-var _ = (RBTreeIterator)((*backwardRBTreeIterator)(nil))
+var _ = (Iterator)((*backwardRBTreeIterator)(nil))
 
 func (brbti *backwardRBTreeIterator) Init(rbt *RBTree) *backwardRBTreeIterator {
 	brbti.rbt = rbt
-	brbti.stack = make([][2]*RBTreeNode, 0, 64)
+	brbti.stack = make([][2]*RBTreeNode, 0, reservedRBTreeIteratorStackDepth)
 	brbti.populateStack(rbt, rbt.root())
 	return brbti
 }
@@ -510,7 +496,7 @@ func (rbti *rbTreeIterator) IsAtEnd() bool {
 	return len(rbti.stack) == 0
 }
 
-func (rbti *rbTreeIterator) Node() *RBTreeNode {
+func (rbti *rbTreeIterator) Node() Node {
 	return rbti.stack[len(rbti.stack)-1][0]
 }
 

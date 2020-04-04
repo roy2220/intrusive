@@ -1,2 +1,2 @@
-// Package intrusive implements intrusive containers.
+// Package intrusive implements intrusive data structures.
 package intrusive

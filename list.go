@@ -59,14 +59,14 @@ func (l *List) PrependSlice(firstNode *ListNode, lastNode *ListNode) {
 	insertListSlice(firstNode, lastNode, &l.nil, l.Head())
 }
 
-// GetNodes returns an iterator over all nodes of the list in order.
-func (l *List) GetNodes() ListIterator {
+// GetNodes returns an iterator over all nodes in the list in order.
+func (l *List) GetNodes() Iterator {
 	return new(forwardListIterator).Init(l)
 }
 
-// GetReverseNodes returns an iterator over all nodes of the list in
+// GetReverseNodes returns an iterator over all nodes in the list in
 // reverse order.
-func (l *List) GetReverseNodes() ListIterator {
+func (l *List) GetReverseNodes() Iterator {
 	return new(backwardListIterator).Init(l)
 }
 
@@ -115,7 +115,7 @@ func (ln *ListNode) Remove() {
 }
 
 // GetContainer returns a pointer to the container which contains
-// the ListNode field about the node.
+// the ListNode field about the node at the given offset.
 // The node must be not null.
 // The given offset is of the ListNode field in the container.
 func (ln *ListNode) GetContainer(offset uintptr) unsafe.Pointer {
@@ -165,22 +165,6 @@ func (ln *ListNode) setNext(next *ListNode) {
 	next.prev = ln
 }
 
-// ListIterator represents an iteration over all nodes in a list.
-type ListIterator interface {
-	// IsAtEnd indicates whether the iteration has no more nodes.
-	IsAtEnd() bool
-
-	// Node returns the current node in the iteration.
-	// It's safe to erase the current node for the next node
-	// to advance to is pre-cached. That will be useful to
-	// destroy the entire list while iterating through the
-	// list.
-	Node() *ListNode
-
-	// Advance advances the iteration to the next node.
-	Advance()
-}
-
 // InsertListSliceBefore inserts the given slice before given list node.
 // Inserting the given slice before a null node is legal as if inserting
 // at the end of a list.
@@ -207,7 +191,7 @@ type forwardListIterator struct {
 	listIterator
 }
 
-var _ = (ListIterator)((*forwardListIterator)(nil))
+var _ = (Iterator)((*forwardListIterator)(nil))
 
 func (fli *forwardListIterator) Init(l *List) *forwardListIterator {
 	fli.l = l
@@ -224,7 +208,7 @@ type backwardListIterator struct {
 	listIterator
 }
 
-var _ = (ListIterator)((*backwardListIterator)(nil))
+var _ = (Iterator)((*backwardListIterator)(nil))
 
 func (bli *backwardListIterator) Init(l *List) *backwardListIterator {
 	bli.l = l
@@ -246,7 +230,7 @@ func (li *listIterator) IsAtEnd() bool {
 	return li.node.IsNull(li.l)
 }
 
-func (li *listIterator) Node() *ListNode {
+func (li *listIterator) Node() Node {
 	return li.node
 }
 

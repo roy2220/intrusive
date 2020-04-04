@@ -12,11 +12,11 @@ import (
 
 func TestListInsertNode(t *testing.T) {
 	for i, tt := range []struct {
-		In  func(*intrusive.List) intrusive.ListIterator
+		In  func(*intrusive.List) intrusive.Iterator
 		Out string
 	}{
 		{
-			In: func(l *intrusive.List) intrusive.ListIterator {
+			In: func(l *intrusive.List) intrusive.Iterator {
 				l.PrependNodes(new(intrusive.List).Init())
 				l.AppendNodes(new(intrusive.List).Init())
 				return l.GetNodes()
@@ -24,7 +24,7 @@ func TestListInsertNode(t *testing.T) {
 			Out: "",
 		},
 		{
-			In: func(l *intrusive.List) intrusive.ListIterator {
+			In: func(l *intrusive.List) intrusive.Iterator {
 				l.AppendNode(&(&recordOfList{Value: 1}).ListNode)
 				l.PrependNode(&(&recordOfList{Value: 2}).ListNode)
 				(&recordOfList{Value: 3}).ListNode.InsertAfter(l.Head())
@@ -36,7 +36,7 @@ func TestListInsertNode(t *testing.T) {
 			Out: "6,2,3,4,1,5",
 		},
 		{
-			In: func(l *intrusive.List) intrusive.ListIterator {
+			In: func(l *intrusive.List) intrusive.Iterator {
 				for i := 0; i < 3; i++ {
 					l.AppendNode(&(&recordOfList{Value: i + 1}).ListNode)
 				}
@@ -50,7 +50,7 @@ func TestListInsertNode(t *testing.T) {
 			Out: "1,2,3,4,5,6",
 		},
 		{
-			In: func(l *intrusive.List) intrusive.ListIterator {
+			In: func(l *intrusive.List) intrusive.Iterator {
 				for i := 0; i < 3; i++ {
 					l.AppendNode(&(&recordOfList{Value: i + 1}).ListNode)
 				}
@@ -64,7 +64,7 @@ func TestListInsertNode(t *testing.T) {
 			Out: "1,2,3,4,5,6",
 		},
 		{
-			In: func(l *intrusive.List) intrusive.ListIterator {
+			In: func(l *intrusive.List) intrusive.Iterator {
 				for i := 0; i < 3; i++ {
 					l.PrependNode(&(&recordOfList{Value: i + 1}).ListNode)
 				}
@@ -79,7 +79,7 @@ func TestListInsertNode(t *testing.T) {
 			Out: "1,2,3,4,5,6",
 		},
 		{
-			In: func(l *intrusive.List) intrusive.ListIterator {
+			In: func(l *intrusive.List) intrusive.Iterator {
 				for i := 0; i < 3; i++ {
 					l.PrependNode(&(&recordOfList{Value: i + 1}).ListNode)
 				}
@@ -93,7 +93,7 @@ func TestListInsertNode(t *testing.T) {
 			Out: "1,2,3,4,5,6",
 		},
 		{
-			In: func(l *intrusive.List) intrusive.ListIterator {
+			In: func(l *intrusive.List) intrusive.Iterator {
 				for i := 0; i < 3; i++ {
 					l.AppendNode(&(&recordOfList{Value: i + 1}).ListNode)
 				}
@@ -107,7 +107,7 @@ func TestListInsertNode(t *testing.T) {
 			Out: "1,4,5,6,2,3",
 		},
 		{
-			In: func(l *intrusive.List) intrusive.ListIterator {
+			In: func(l *intrusive.List) intrusive.Iterator {
 				for i := 0; i < 3; i++ {
 					l.AppendNode(&(&recordOfList{Value: i + 1}).ListNode)
 				}
@@ -128,15 +128,15 @@ func TestListInsertNode(t *testing.T) {
 
 func TestListRemoveNode(t *testing.T) {
 	for i, tt := range []struct {
-		In  func(*intrusive.List) intrusive.ListIterator
+		In  func(*intrusive.List) intrusive.Iterator
 		Out string
 	}{
 		{
-			In:  func(l *intrusive.List) intrusive.ListIterator { return l.GetNodes() },
+			In:  func(l *intrusive.List) intrusive.Iterator { return l.GetNodes() },
 			Out: "1,2,3,4,5,6",
 		},
 		{
-			In: func(l *intrusive.List) intrusive.ListIterator {
+			In: func(l *intrusive.List) intrusive.Iterator {
 				l.Head().Remove()
 				l.Tail().Remove()
 				l.Head().Next().Remove()
@@ -146,7 +146,7 @@ func TestListRemoveNode(t *testing.T) {
 			Out: "2,5",
 		},
 		{
-			In: func(l *intrusive.List) intrusive.ListIterator {
+			In: func(l *intrusive.List) intrusive.Iterator {
 				x, y := l.Head().Next(), l.Tail().Prev()
 				intrusive.RemoveListSlice(x, y)
 				return l.GetReverseNodes()
@@ -154,7 +154,7 @@ func TestListRemoveNode(t *testing.T) {
 			Out: "6,1",
 		},
 		{
-			In: func(l *intrusive.List) intrusive.ListIterator {
+			In: func(l *intrusive.List) intrusive.Iterator {
 				x, y := l.Head(), l.Tail()
 				intrusive.RemoveListSlice(x, y)
 				return l.GetNodes()
@@ -177,12 +177,12 @@ type recordOfList struct {
 	ListNode intrusive.ListNode
 }
 
-func dumpRecordList(it intrusive.ListIterator) string {
+func dumpRecordList(it intrusive.Iterator) string {
 	buffer := bytes.NewBuffer(nil)
 
 	for ; !it.IsAtEnd(); it.Advance() {
-		*it.Node() = intrusive.ListNode{} // destry the list
 		record := (*recordOfList)(it.Node().GetContainer(unsafe.Offsetof(recordOfList{}.ListNode)))
+		record.ListNode = intrusive.ListNode{} // destry the list
 		fmt.Fprintf(buffer, "%v,", record.Value)
 	}
 
