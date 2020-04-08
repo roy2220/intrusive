@@ -12,31 +12,30 @@ import (
 
 func TestListInsertNode(t *testing.T) {
 	for i, tt := range []struct {
-		In  func(*intrusive.List) intrusive.Iterator
-		Out string
+		In           func(*intrusive.List)
+		Out          string
+		OutIsReverse bool
 	}{
 		{
-			In: func(l *intrusive.List) intrusive.Iterator {
+			In: func(l *intrusive.List) {
 				l.PrependNodes(new(intrusive.List).Init())
 				l.AppendNodes(new(intrusive.List).Init())
-				return l.GetNodes()
 			},
 			Out: "",
 		},
 		{
-			In: func(l *intrusive.List) intrusive.Iterator {
+			In: func(l *intrusive.List) {
 				l.AppendNode(&(&recordOfList{Value: 1}).ListNode)
 				l.PrependNode(&(&recordOfList{Value: 2}).ListNode)
 				(&recordOfList{Value: 3}).ListNode.InsertAfter(l.Head())
 				(&recordOfList{Value: 4}).ListNode.InsertBefore(l.Tail())
 				(&recordOfList{Value: 5}).ListNode.InsertAfter(l.Tail())
 				(&recordOfList{Value: 6}).ListNode.InsertBefore(l.Head())
-				return l.GetNodes()
 			},
 			Out: "6,2,3,4,1,5",
 		},
 		{
-			In: func(l *intrusive.List) intrusive.Iterator {
+			In: func(l *intrusive.List) {
 				for i := 0; i < 3; i++ {
 					l.AppendNode(&(&recordOfList{Value: i + 1}).ListNode)
 				}
@@ -45,12 +44,11 @@ func TestListInsertNode(t *testing.T) {
 					l2.AppendNode(&(&recordOfList{Value: i + 1}).ListNode)
 				}
 				l.AppendNodes(l2)
-				return l.GetNodes()
 			},
 			Out: "1,2,3,4,5,6",
 		},
 		{
-			In: func(l *intrusive.List) intrusive.Iterator {
+			In: func(l *intrusive.List) {
 				for i := 0; i < 3; i++ {
 					l.AppendNode(&(&recordOfList{Value: i + 1}).ListNode)
 				}
@@ -59,12 +57,11 @@ func TestListInsertNode(t *testing.T) {
 					l2.AppendNode(&(&recordOfList{Value: i + 1}).ListNode)
 				}
 				l.AppendSlice(l2.Head(), l2.Tail())
-				return l.GetNodes()
 			},
 			Out: "1,2,3,4,5,6",
 		},
 		{
-			In: func(l *intrusive.List) intrusive.Iterator {
+			In: func(l *intrusive.List) {
 				for i := 0; i < 3; i++ {
 					l.PrependNode(&(&recordOfList{Value: i + 1}).ListNode)
 				}
@@ -74,12 +71,12 @@ func TestListInsertNode(t *testing.T) {
 				}
 				l.PrependNodes(l2)
 				assert.True(t, l2.IsEmpty())
-				return l.GetReverseNodes()
 			},
-			Out: "1,2,3,4,5,6",
+			Out:          "1,2,3,4,5,6",
+			OutIsReverse: true,
 		},
 		{
-			In: func(l *intrusive.List) intrusive.Iterator {
+			In: func(l *intrusive.List) {
 				for i := 0; i < 3; i++ {
 					l.PrependNode(&(&recordOfList{Value: i + 1}).ListNode)
 				}
@@ -88,12 +85,12 @@ func TestListInsertNode(t *testing.T) {
 					l2.PrependNode(&(&recordOfList{Value: i + 1}).ListNode)
 				}
 				l.PrependSlice(l2.Head(), l2.Tail())
-				return l.GetReverseNodes()
 			},
-			Out: "1,2,3,4,5,6",
+			Out:          "1,2,3,4,5,6",
+			OutIsReverse: true,
 		},
 		{
-			In: func(l *intrusive.List) intrusive.Iterator {
+			In: func(l *intrusive.List) {
 				for i := 0; i < 3; i++ {
 					l.AppendNode(&(&recordOfList{Value: i + 1}).ListNode)
 				}
@@ -102,12 +99,11 @@ func TestListInsertNode(t *testing.T) {
 					l2.AppendNode(&(&recordOfList{Value: i + 1}).ListNode)
 				}
 				intrusive.InsertListSliceAfter(l2.Head(), l2.Tail(), l.Head())
-				return l.GetNodes()
 			},
 			Out: "1,4,5,6,2,3",
 		},
 		{
-			In: func(l *intrusive.List) intrusive.Iterator {
+			In: func(l *intrusive.List) {
 				for i := 0; i < 3; i++ {
 					l.AppendNode(&(&recordOfList{Value: i + 1}).ListNode)
 				}
@@ -116,48 +112,51 @@ func TestListInsertNode(t *testing.T) {
 					l2.AppendNode(&(&recordOfList{Value: i + 1}).ListNode)
 				}
 				intrusive.InsertListSliceBefore(l2.Head(), l2.Tail(), l.Tail())
-				return l.GetNodes()
 			},
 			Out: "1,2,4,5,6,3",
 		},
 	} {
 		l := new(intrusive.List).Init()
-		assert.Equal(t, tt.Out, dumpRecordList(tt.In(l)), "case %d", i)
+		tt.In(l)
+		if tt.OutIsReverse {
+			assert.Equal(t, tt.Out, dumpReverseRecordList(l), "case %d", i)
+		} else {
+			assert.Equal(t, tt.Out, dumpRecordList(l), "case %d", i)
+		}
 	}
 }
 
 func TestListRemoveNode(t *testing.T) {
 	for i, tt := range []struct {
-		In  func(*intrusive.List) intrusive.Iterator
-		Out string
+		In           func(*intrusive.List)
+		Out          string
+		OutIsReverse bool
 	}{
 		{
-			In:  func(l *intrusive.List) intrusive.Iterator { return l.GetNodes() },
+			In:  func(l *intrusive.List) {},
 			Out: "1,2,3,4,5,6",
 		},
 		{
-			In: func(l *intrusive.List) intrusive.Iterator {
+			In: func(l *intrusive.List) {
 				l.Head().Remove()
 				l.Tail().Remove()
 				l.Head().Next().Remove()
 				l.Tail().Prev().Remove()
-				return l.GetNodes()
 			},
 			Out: "2,5",
 		},
 		{
-			In: func(l *intrusive.List) intrusive.Iterator {
+			In: func(l *intrusive.List) {
 				x, y := l.Head().Next(), l.Tail().Prev()
 				intrusive.RemoveListSlice(x, y)
-				return l.GetReverseNodes()
 			},
-			Out: "6,1",
+			Out:          "6,1",
+			OutIsReverse: true,
 		},
 		{
-			In: func(l *intrusive.List) intrusive.Iterator {
+			In: func(l *intrusive.List) {
 				x, y := l.Head(), l.Tail()
 				intrusive.RemoveListSlice(x, y)
-				return l.GetNodes()
 			},
 			Out: "",
 		},
@@ -168,7 +167,12 @@ func TestListRemoveNode(t *testing.T) {
 			assert.True(t, r.ListNode.IsReset())
 			l.AppendNode(&r.ListNode)
 		}
-		assert.Equal(t, tt.Out, dumpRecordList(tt.In(l)), "case %d", i)
+		tt.In(l)
+		if tt.OutIsReverse {
+			assert.Equal(t, tt.Out, dumpReverseRecordList(l), "case %d", i)
+		} else {
+			assert.Equal(t, tt.Out, dumpRecordList(l), "case %d", i)
+		}
 	}
 }
 
@@ -177,10 +181,27 @@ type recordOfList struct {
 	ListNode intrusive.ListNode
 }
 
-func dumpRecordList(it intrusive.Iterator) string {
+func dumpRecordList(list *intrusive.List) string {
 	buffer := bytes.NewBuffer(nil)
 
-	for ; !it.IsAtEnd(); it.Advance() {
+	for it := list.Foreach(); !it.IsAtEnd(); it.Advance() {
+		record := (*recordOfList)(it.Node().GetContainer(unsafe.Offsetof(recordOfList{}.ListNode)))
+		record.ListNode = intrusive.ListNode{} // destry the list
+		fmt.Fprintf(buffer, "%v,", record.Value)
+	}
+
+	if n := buffer.Len(); n >= 1 {
+		buffer.Truncate(n - 1)
+		return buffer.String()
+	}
+
+	return ""
+}
+
+func dumpReverseRecordList(list *intrusive.List) string {
+	buffer := bytes.NewBuffer(nil)
+
+	for it := list.ForeachReverse(); !it.IsAtEnd(); it.Advance() {
 		record := (*recordOfList)(it.Node().GetContainer(unsafe.Offsetof(recordOfList{}.ListNode)))
 		record.ListNode = intrusive.ListNode{} // destry the list
 		fmt.Fprintf(buffer, "%v,", record.Value)

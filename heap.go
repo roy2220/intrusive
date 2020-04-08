@@ -41,9 +41,9 @@ func (h *Heap) GetTop() (*HeapNode, bool) {
 	return h.nodes[0], true
 }
 
-// GetNodes returns an iterator over all nodes in the heap.
-func (h *Heap) GetNodes() Iterator {
-	return new(heapIterator).Init(h)
+// Foreach returns an iterator over all nodes in the heap.
+func (h *Heap) Foreach() *HeapIterator {
+	return new(HeapIterator).Init(h)
 }
 
 // IsEmpty indicates whether the heap is empty.
@@ -157,26 +157,33 @@ func (hn *HeapNode) index() int {
 	return hn.number - 1
 }
 
-type heapIterator struct {
+// HeapIterator represents an iterator over all nodes in
+// a binary heap.
+type HeapIterator struct {
 	h         *Heap
 	nodeIndex int
 }
 
-var _ = (Iterator)((*heapIterator)(nil))
-
-func (hi *heapIterator) Init(h *Heap) *heapIterator {
+// Init initializes the iterator and then returns the iterator.
+func (hi *HeapIterator) Init(h *Heap) *HeapIterator {
 	hi.h = h
 	return hi
 }
 
-func (hi *heapIterator) IsAtEnd() bool {
+// IsAtEnd indicates whether the iteration has no more nodes.
+func (hi *HeapIterator) IsAtEnd() bool {
 	return hi.nodeIndex == len(hi.h.nodes)
 }
 
-func (hi *heapIterator) Node() Node {
+// Node returns the current node in the iteration.
+// It's safe to erase the current node for the next node
+// to advance to is pre-cached. That will be useful to
+// destroy the entire heap while iterating through the heap.
+func (hi *HeapIterator) Node() *HeapNode {
 	return hi.h.nodes[hi.nodeIndex]
 }
 
-func (hi *heapIterator) Advance() {
+// Advance advances the iterator to the next node.
+func (hi *HeapIterator) Advance() {
 	hi.nodeIndex++
 }

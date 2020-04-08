@@ -59,15 +59,15 @@ func (l *List) PrependSlice(firstNode *ListNode, lastNode *ListNode) {
 	insertListSlice(firstNode, lastNode, &l.nil, l.Head())
 }
 
-// GetNodes returns an iterator over all nodes in the list in order.
-func (l *List) GetNodes() Iterator {
-	return new(forwardListIterator).Init(l)
+// Foreach returns an iterator over all nodes in the list in order.
+func (l *List) Foreach() *ListIterator {
+	return new(ListIterator).Init(l)
 }
 
-// GetReverseNodes returns an iterator over all nodes in the list in
+// ForeachReverse returns an iterator over all nodes in the list in
 // reverse order.
-func (l *List) GetReverseNodes() Iterator {
-	return new(backwardListIterator).Init(l)
+func (l *List) ForeachReverse() *ListReverseIterator {
+	return new(ListReverseIterator).Init(l)
 }
 
 // IsEmpty indicates whether the list is empty.
@@ -165,6 +165,44 @@ func (ln *ListNode) setNext(next *ListNode) {
 	next.prev = ln
 }
 
+// ListIterator represents an iterator over all nodes in
+// a doubly-linked list.
+type ListIterator struct {
+	listIteratorBase
+}
+
+// Init initializes the iterator and then returns the iterator.
+func (li *ListIterator) Init(l *List) *ListIterator {
+	li.l = l
+	li.node = l.Head()
+	li.nextNode = li.node.Next()
+	return li
+}
+
+// Advance advances the iterator to the next node.
+func (li *ListIterator) Advance() {
+	li.advance(li.nextNode.Next())
+}
+
+// ListReverseIterator represents an iterator over all nodes in
+// a doubly-linked list in reverse order.
+type ListReverseIterator struct {
+	listIteratorBase
+}
+
+// Init initializes the iterator and then returns the iterator.
+func (lri *ListReverseIterator) Init(l *List) *ListReverseIterator {
+	lri.l = l
+	lri.node = l.Tail()
+	lri.nextNode = lri.node.Prev()
+	return lri
+}
+
+// Advance advances the iterator to the next node.
+func (lri *ListReverseIterator) Advance() {
+	lri.advance(lri.nextNode.Prev())
+}
+
 // InsertListSliceBefore inserts the given slice before given list node.
 // Inserting the given slice before a null node is legal as if inserting
 // at the end of a list.
@@ -187,56 +225,27 @@ func RemoveListSlice(firstListNode *ListNode, lastListNode *ListNode) {
 	firstListNode.prev.setNext(lastListNode.next)
 }
 
-type forwardListIterator struct {
-	listIterator
-}
-
-var _ = (Iterator)((*forwardListIterator)(nil))
-
-func (fli *forwardListIterator) Init(l *List) *forwardListIterator {
-	fli.l = l
-	fli.node = l.Head()
-	fli.nextNode = fli.node.Next()
-	return fli
-}
-
-func (fli *forwardListIterator) Advance() {
-	fli.advance(fli.nextNode.Next())
-}
-
-type backwardListIterator struct {
-	listIterator
-}
-
-var _ = (Iterator)((*backwardListIterator)(nil))
-
-func (bli *backwardListIterator) Init(l *List) *backwardListIterator {
-	bli.l = l
-	bli.node = l.Tail()
-	bli.nextNode = bli.node.Prev()
-	return bli
-}
-
-func (bli *backwardListIterator) Advance() {
-	bli.advance(bli.nextNode.Prev())
-}
-
-type listIterator struct {
+type listIteratorBase struct {
 	l              *List
 	node, nextNode *ListNode
 }
 
-func (li *listIterator) IsAtEnd() bool {
-	return li.node.IsNull(li.l)
+// IsAtEnd indicates whether the iteration has no more nodes.
+func (lib *listIteratorBase) IsAtEnd() bool {
+	return lib.node.IsNull(lib.l)
 }
 
-func (li *listIterator) Node() Node {
-	return li.node
+// Node returns the current node in the iteration.
+// It's safe to erase the current node for the next node
+// to advance to is pre-cached. That will be useful to
+// destroy the entire list while iterating through the list.
+func (lib *listIteratorBase) Node() *ListNode {
+	return lib.node
 }
 
-func (li *listIterator) advance(nextNode *ListNode) {
-	li.node = li.nextNode
-	li.nextNode = nextNode
+func (lib *listIteratorBase) advance(nextNode *ListNode) {
+	lib.node = lib.nextNode
+	lib.nextNode = nextNode
 }
 
 func insertListSlice(firstListNode *ListNode, lastListNode *ListNode, firstListNodePrev *ListNode, lastListNodeNext *ListNode) {

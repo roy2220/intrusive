@@ -100,15 +100,15 @@ func (rbt *RBTree) FindNode(key interface{}) (*RBTreeNode, bool) {
 	return nil, false
 }
 
-// GetNodes returns an iterator over all nodes in the tree in order.
-func (rbt *RBTree) GetNodes() Iterator {
-	return new(forwardRBTreeIterator).Init(rbt)
+// Foreach returns an iterator over all nodes in the tree in order.
+func (rbt *RBTree) Foreach() *RBTreeIterator {
+	return new(RBTreeIterator).Init(rbt)
 }
 
-// GetReverseNodes returns an iterator over all nodes in the tree in
+// ForeachReverse returns an iterator over all nodes in the tree in
 // reverse order.
-func (rbt *RBTree) GetReverseNodes() Iterator {
-	return new(backwardRBTreeIterator).Init(rbt)
+func (rbt *RBTree) ForeachReverse() *RBTreeReverseIterator {
+	return new(RBTreeReverseIterator).Init(rbt)
 }
 
 // GetRoot returns the root of the tree.
@@ -430,6 +430,58 @@ func (rbtn *RBTreeNode) isNull(rbt *RBTree) bool {
 	return rbtn == &rbt.nil
 }
 
+// RBTreeIterator represents an iterator over all nodes in
+// a red-black tree.
+type RBTreeIterator struct {
+	rbTreeIteratorBase
+}
+
+// Init initializes the iterator and then returns the iterator.
+func (rbti *RBTreeIterator) Init(rbt *RBTree) *RBTreeIterator {
+	rbti.rbt = rbt
+	rbti.stack = make([][2]*RBTreeNode, 0, reservedRBTreeIteratorStackDepth)
+	rbti.populateStack(rbt, rbt.root())
+	return rbti
+}
+
+// Advance advances the iterator to the next node.
+func (rbti *RBTreeIterator) Advance() {
+	rbti.populateStack(rbti.rbt, rbti.popStack()[1])
+}
+
+func (rbti *RBTreeIterator) populateStack(rbt *RBTree, x *RBTreeNode) {
+	for !x.isNull(rbt) {
+		rbti.stack = append(rbti.stack, [2]*RBTreeNode{x, x.rightChild})
+		x = x.leftChild
+	}
+}
+
+// RBTreeReverseIterator represents an iterator over all nodes in
+// a red-black tree in reverse order.
+type RBTreeReverseIterator struct {
+	rbTreeIteratorBase
+}
+
+// Init initializes the iterator and then returns the iterator.
+func (rbtri *RBTreeReverseIterator) Init(rbt *RBTree) *RBTreeReverseIterator {
+	rbtri.rbt = rbt
+	rbtri.stack = make([][2]*RBTreeNode, 0, reservedRBTreeIteratorStackDepth)
+	rbtri.populateStack(rbt, rbt.root())
+	return rbtri
+}
+
+// Advance advances the iterator to the next node.
+func (rbtri *RBTreeReverseIterator) Advance() {
+	rbtri.populateStack(rbtri.rbt, rbtri.popStack()[1])
+}
+
+func (rbtri *RBTreeReverseIterator) populateStack(rbt *RBTree, x *RBTreeNode) {
+	for !x.isNull(rbt) {
+		rbtri.stack = append(rbtri.stack, [2]*RBTreeNode{x, x.leftChild})
+		x = x.rightChild
+	}
+}
+
 const (
 	rbTreeNodeRed = rbTreeNodeColor(iota)
 	rbTreeNodeBlack
@@ -439,70 +491,27 @@ const reservedRBTreeIteratorStackDepth = 64
 
 type rbTreeNodeColor int
 
-type forwardRBTreeIterator struct {
-	rbTreeIterator
-}
-
-var _ = (Iterator)((*forwardRBTreeIterator)(nil))
-
-func (frbti *forwardRBTreeIterator) Init(rbt *RBTree) *forwardRBTreeIterator {
-	frbti.rbt = rbt
-	frbti.stack = make([][2]*RBTreeNode, 0, reservedRBTreeIteratorStackDepth)
-	frbti.populateStack(rbt, rbt.root())
-	return frbti
-}
-
-func (frbti *forwardRBTreeIterator) Advance() {
-	frbti.populateStack(frbti.rbt, frbti.popStack()[1])
-}
-
-func (frbti *forwardRBTreeIterator) populateStack(rbt *RBTree, x *RBTreeNode) {
-	for !x.isNull(rbt) {
-		frbti.stack = append(frbti.stack, [2]*RBTreeNode{x, x.rightChild})
-		x = x.leftChild
-	}
-}
-
-type backwardRBTreeIterator struct {
-	rbTreeIterator
-}
-
-var _ = (Iterator)((*backwardRBTreeIterator)(nil))
-
-func (brbti *backwardRBTreeIterator) Init(rbt *RBTree) *backwardRBTreeIterator {
-	brbti.rbt = rbt
-	brbti.stack = make([][2]*RBTreeNode, 0, reservedRBTreeIteratorStackDepth)
-	brbti.populateStack(rbt, rbt.root())
-	return brbti
-}
-
-func (brbti *backwardRBTreeIterator) Advance() {
-	brbti.populateStack(brbti.rbt, brbti.popStack()[1])
-}
-
-func (brbti *backwardRBTreeIterator) populateStack(rbt *RBTree, x *RBTreeNode) {
-	for !x.isNull(rbt) {
-		brbti.stack = append(brbti.stack, [2]*RBTreeNode{x, x.leftChild})
-		x = x.rightChild
-	}
-}
-
-type rbTreeIterator struct {
+type rbTreeIteratorBase struct {
 	rbt   *RBTree
 	stack [][2]*RBTreeNode
 }
 
-func (rbti *rbTreeIterator) IsAtEnd() bool {
-	return len(rbti.stack) == 0
+// IsAtEnd indicates whether the iteration has no more nodes.
+func (rbtib *rbTreeIteratorBase) IsAtEnd() bool {
+	return len(rbtib.stack) == 0
 }
 
-func (rbti *rbTreeIterator) Node() Node {
-	return rbti.stack[len(rbti.stack)-1][0]
+// Node returns the current node in the iteration.
+// It's safe to erase the current node for the next node
+// to advance to is pre-cached. That will be useful to
+// destroy the entire tree while iterating through the tree.
+func (rbtib *rbTreeIteratorBase) Node() *RBTreeNode {
+	return rbtib.stack[len(rbtib.stack)-1][0]
 }
 
-func (rbti *rbTreeIterator) popStack() [2]*RBTreeNode {
-	i := len(rbti.stack) - 1
-	stackTop := rbti.stack[i]
-	rbti.stack = rbti.stack[:i]
+func (rbtib *rbTreeIteratorBase) popStack() [2]*RBTreeNode {
+	i := len(rbtib.stack) - 1
+	stackTop := rbtib.stack[i]
+	rbtib.stack = rbtib.stack[:i]
 	return stackTop
 }

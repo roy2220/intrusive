@@ -131,7 +131,7 @@ func TestHeap(t *testing.T) {
 	for j := range removedRecordIndexes {
 		h.InsertNode(&rs[j].HeapNode)
 	}
-	for it := h.GetNodes(); !it.IsAtEnd(); it.Advance() {
+	for it := h.Foreach(); !it.IsAtEnd(); it.Advance() {
 		r := (*recordOfHeap)(it.Node().GetContainer(unsafe.Offsetof(recordOfHeap{}.HeapNode)))
 		assert.GreaterOrEqual(t, r.Value, 1)
 		r.Value -= len(rs)

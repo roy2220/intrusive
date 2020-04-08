@@ -50,13 +50,11 @@ func TestRBTreeInsertNode(t *testing.T) {
 		for _, v := range tt.In {
 			rbt.InsertNode(&(&recordOfRBTree{Value: v}).RBTreeNode)
 		}
-		var it intrusive.Iterator
 		if tt.OutIsReverse {
-			it = rbt.GetReverseNodes()
+			assert.Equal(t, tt.Out, dumpReverseRecordRBTree(rbt), "case %d", i)
 		} else {
-			it = rbt.GetNodes()
+			assert.Equal(t, tt.Out, dumpRecordRBTree(rbt), "case %d", i)
 		}
-		assert.Equal(t, tt.Out, dumpRecordRBTree(it), "case %d", i)
 	}
 }
 
@@ -121,13 +119,11 @@ func TestRBTreeRemoveNode(t *testing.T) {
 			r := &rs[v-1]
 			rbt.RemoveNode(&r.RBTreeNode)
 		}
-		var it intrusive.Iterator
 		if tt.OutIsReverse {
-			it = rbt.GetReverseNodes()
+			assert.Equal(t, tt.Out, dumpReverseRecordRBTree(rbt), "case %d", i)
 		} else {
-			it = rbt.GetNodes()
+			assert.Equal(t, tt.Out, dumpRecordRBTree(rbt), "case %d", i)
 		}
-		assert.Equal(t, tt.Out, dumpRecordRBTree(it), "case %d", i)
 	}
 }
 
@@ -267,10 +263,27 @@ func compareRBTreeNodeOfRecrod(node *intrusive.RBTreeNode, value interface{}) in
 	return int64((*recordOfRBTree)(node.GetContainer(unsafe.Offsetof(recordOfRBTree{}.RBTreeNode))).Value - value.(int))
 }
 
-func dumpRecordRBTree(it intrusive.Iterator) string {
+func dumpRecordRBTree(rbTree *intrusive.RBTree) string {
 	buffer := bytes.NewBuffer(nil)
 
-	for ; !it.IsAtEnd(); it.Advance() {
+	for it := rbTree.Foreach(); !it.IsAtEnd(); it.Advance() {
+		record := (*recordOfRBTree)(it.Node().GetContainer(unsafe.Offsetof(recordOfRBTree{}.RBTreeNode)))
+		record.RBTreeNode = intrusive.RBTreeNode{} // destry the tree
+		fmt.Fprintf(buffer, "%v,", record.Value)
+	}
+
+	if n := buffer.Len(); n >= 1 {
+		buffer.Truncate(n - 1)
+		return buffer.String()
+	}
+
+	return ""
+}
+
+func dumpReverseRecordRBTree(rbTree *intrusive.RBTree) string {
+	buffer := bytes.NewBuffer(nil)
+
+	for it := rbTree.ForeachReverse(); !it.IsAtEnd(); it.Advance() {
 		record := (*recordOfRBTree)(it.Node().GetContainer(unsafe.Offsetof(recordOfRBTree{}.RBTreeNode)))
 		record.RBTreeNode = intrusive.RBTreeNode{} // destry the tree
 		fmt.Fprintf(buffer, "%v,", record.Value)

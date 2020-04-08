@@ -38,7 +38,7 @@ func ExampleRBTree() {
 		rbt.InsertNode(&r.RBTreeNode)
 	}
 
-	for it := rbt.GetNodes(); !it.IsAtEnd(); it.Advance() {
+	for it := rbt.Foreach(); !it.IsAtEnd(); it.Advance() {
 		r := (*Record)(it.Node().GetContainer(unsafe.Offsetof(Record{}.RBTreeNode)))
 		fmt.Printf("%v,", r.Value)
 	}
@@ -51,7 +51,7 @@ func ExampleRBTree() {
 		}
 	}
 
-	for it := rbt.GetReverseNodes(); !it.IsAtEnd(); it.Advance() {
+	for it := rbt.ForeachReverse(); !it.IsAtEnd(); it.Advance() {
 		r := (*Record)(it.Node().GetContainer(unsafe.Offsetof(Record{}.RBTreeNode)))
 		fmt.Printf("%v,", r.Value)
 	}

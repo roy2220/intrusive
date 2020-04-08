@@ -30,7 +30,7 @@ func ExampleList() {
 	rs[4].ListNode.InsertBefore(l.Head())
 	rs[5].ListNode.InsertAfter(&rs[1].ListNode)
 
-	for it := l.GetNodes(); !it.IsAtEnd(); it.Advance() {
+	for it := l.Foreach(); !it.IsAtEnd(); it.Advance() {
 		r := (*Record)(it.Node().GetContainer(unsafe.Offsetof(Record{}.ListNode)))
 		fmt.Printf("%v,", r.Value)
 	}
@@ -41,7 +41,7 @@ func ExampleList() {
 	rs[2].ListNode.Remove()
 	rs[0].ListNode.Remove()
 
-	for it := l.GetReverseNodes(); !it.IsAtEnd(); it.Advance() {
+	for it := l.ForeachReverse(); !it.IsAtEnd(); it.Advance() {
 		r := (*Record)(it.Node().GetContainer(unsafe.Offsetof(Record{}.ListNode)))
 		fmt.Printf("%v,", r.Value)
 	}

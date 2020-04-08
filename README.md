@@ -14,6 +14,9 @@ An implement of intrusive doubly-linked lists.
 
 ### Example
 
+<details>
+  <summary>code</summary>
+
 ```go
 package main
 
@@ -47,7 +50,7 @@ func main() {
         rs[4].ListNode.InsertBefore(l.Head())
         rs[5].ListNode.InsertAfter(&rs[1].ListNode)
 
-        for it := l.GetNodes(); !it.IsAtEnd(); it.Advance() {
+        for it := l.Foreach(); !it.IsAtEnd(); it.Advance() {
                 r := (*Record)(it.Node().GetContainer(unsafe.Offsetof(Record{}.ListNode)))
                 fmt.Printf("%v,", r.Value)
         }
@@ -58,7 +61,7 @@ func main() {
         rs[2].ListNode.Remove()
         rs[0].ListNode.Remove()
 
-        for it := l.GetReverseNodes(); !it.IsAtEnd(); it.Advance() {
+        for it := l.ForeachReverse(); !it.IsAtEnd(); it.Advance() {
                 r := (*Record)(it.Node().GetContainer(unsafe.Offsetof(Record{}.ListNode)))
                 fmt.Printf("%v,", r.Value)
         }
@@ -69,11 +72,16 @@ func main() {
 }
 ```
 
+</details>
+
 ## RBTree
 
 An implement of intrusive red-black tree.
 
 ### Example
+
+<details>
+  <summary>code</summary>
 
 ```go
 package main
@@ -116,7 +124,7 @@ func main() {
                 rbt.InsertNode(&r.RBTreeNode)
         }
 
-        for it := rbt.GetNodes(); !it.IsAtEnd(); it.Advance() {
+        for it := rbt.Foreach(); !it.IsAtEnd(); it.Advance() {
                 r := (*Record)(it.Node().GetContainer(unsafe.Offsetof(Record{}.RBTreeNode)))
                 fmt.Printf("%v,", r.Value)
         }
@@ -129,7 +137,7 @@ func main() {
                 }
         }
 
-        for it := rbt.GetReverseNodes(); !it.IsAtEnd(); it.Advance() {
+        for it := rbt.ForeachReverse(); !it.IsAtEnd(); it.Advance() {
                 r := (*Record)(it.Node().GetContainer(unsafe.Offsetof(Record{}.RBTreeNode)))
                 fmt.Printf("%v,", r.Value)
         }
@@ -140,11 +148,16 @@ func main() {
 }
 ```
 
+</details>
+
 ## Heap
 
 An implement of intrusive binary heap.
 
 ### Example
+
+<details>
+  <summary>code</summary>
 
 ```go
 package main
@@ -201,3 +214,5 @@ func main() {
         // 1,3,5,
 }
 ```
+
+</details>
