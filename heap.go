@@ -9,9 +9,9 @@ type Heap struct {
 }
 
 // Init initializes the heap and then returns the heap.
-func (h *Heap) Init(nodeOrderer HeapNodeOrderer, numberOfReservedNodes int) *Heap {
+func (h *Heap) Init(nodeOrderer HeapNodeOrderer, initialCapacity int) *Heap {
 	h.nodeOrderer = nodeOrderer
-	h.nodes = make([]*HeapNode, 0, numberOfReservedNodes)
+	h.nodes = make([]*HeapNode, 0, initialCapacity)
 	return h
 }
 

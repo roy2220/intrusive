@@ -439,7 +439,7 @@ type RBTreeIterator struct {
 // Init initializes the iterator and then returns the iterator.
 func (rbti *RBTreeIterator) Init(rbt *RBTree) *RBTreeIterator {
 	rbti.rbt = rbt
-	rbti.stack = make([][2]*RBTreeNode, 0, reservedRBTreeIteratorStackDepth)
+	rbti.stack = make([][2]*RBTreeNode, 0, initialRBTreeIteratorStackCapacity)
 	rbti.populateStack(rbt, rbt.root())
 	return rbti
 }
@@ -465,7 +465,7 @@ type RBTreeReverseIterator struct {
 // Init initializes the iterator and then returns the iterator.
 func (rbtri *RBTreeReverseIterator) Init(rbt *RBTree) *RBTreeReverseIterator {
 	rbtri.rbt = rbt
-	rbtri.stack = make([][2]*RBTreeNode, 0, reservedRBTreeIteratorStackDepth)
+	rbtri.stack = make([][2]*RBTreeNode, 0, initialRBTreeIteratorStackCapacity)
 	rbtri.populateStack(rbt, rbt.root())
 	return rbtri
 }
@@ -487,7 +487,7 @@ const (
 	rbTreeNodeBlack
 )
 
-const reservedRBTreeIteratorStackDepth = 64
+const initialRBTreeIteratorStackCapacity = 64
 
 type rbTreeNodeColor int
 
