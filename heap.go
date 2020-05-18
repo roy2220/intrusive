@@ -48,7 +48,12 @@ func (h *Heap) Foreach() *HeapIterator {
 
 // IsEmpty indicates whether the heap is empty.
 func (h *Heap) IsEmpty() bool {
-	return len(h.nodes) == 0
+	return h.NumberOfNodes() == 0
+}
+
+// NumberOfNodes returns the number of nodes in the heap.
+func (h *Heap) NumberOfNodes() int {
+	return len(h.nodes)
 }
 
 func (h *Heap) siftUp(x *HeapNode, i int) {

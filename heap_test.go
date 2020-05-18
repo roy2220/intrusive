@@ -93,7 +93,7 @@ func TestHeapRemoveNode(t *testing.T) {
 			r.Value = i + 1
 			h.InsertNode(&r.HeapNode)
 		}
-		assert.False(t, h.IsEmpty())
+		assert.Equal(t, len(rs), h.NumberOfNodes())
 		_, ok := h.GetTop()
 		assert.True(t, ok)
 		for _, v := range tt.In {
