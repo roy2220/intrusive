@@ -114,11 +114,11 @@ func main() {
                 r2 := (*Record)(node2.GetContainer(unsafe.Offsetof(Record{}.RBTreeNode)))
                 return r1.Value < r2.Value
         }
-        comparer := func(node *intrusive.RBTreeNode, value interface{}) int64 {
+        compare := func(node *intrusive.RBTreeNode, value interface{}) int64 {
                 r := (*Record)(node.GetContainer(unsafe.Offsetof(Record{}.RBTreeNode)))
                 return int64(r.Value - value.(int))
         }
-        rbt := new(intrusive.RBTree).Init(order, comparer)
+        rbt := new(intrusive.RBTree).Init(order, compare)
 
         for i := range rs {
                 r := &rs[i]
