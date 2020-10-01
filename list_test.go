@@ -182,12 +182,12 @@ type recordOfList struct {
 }
 
 func dumpRecordList(list *intrusive.List) string {
-	buffer := bytes.NewBuffer(nil)
+	var buffer bytes.Buffer
 
 	for it := list.Foreach(); !it.IsAtEnd(); it.Advance() {
 		record := (*recordOfList)(it.Node().GetContainer(unsafe.Offsetof(recordOfList{}.ListNode)))
 		record.ListNode = intrusive.ListNode{} // destry the list
-		fmt.Fprintf(buffer, "%v,", record.Value)
+		fmt.Fprintf(&buffer, "%v,", record.Value)
 	}
 
 	if n := buffer.Len(); n >= 1 {
@@ -199,12 +199,12 @@ func dumpRecordList(list *intrusive.List) string {
 }
 
 func dumpReverseRecordList(list *intrusive.List) string {
-	buffer := bytes.NewBuffer(nil)
+	var buffer bytes.Buffer
 
 	for it := list.ForeachReverse(); !it.IsAtEnd(); it.Advance() {
 		record := (*recordOfList)(it.Node().GetContainer(unsafe.Offsetof(recordOfList{}.ListNode)))
 		record.ListNode = intrusive.ListNode{} // destry the list
-		fmt.Fprintf(buffer, "%v,", record.Value)
+		fmt.Fprintf(&buffer, "%v,", record.Value)
 	}
 
 	if n := buffer.Len(); n >= 1 {

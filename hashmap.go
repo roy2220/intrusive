@@ -281,6 +281,6 @@ func (hms *hashMapSlot) Merge(low *hashMapSlot) {
 }
 
 var (
-	hashMapNil       = HashMapNode{}
+	hashMapNil       HashMapNode
 	emptyHashMapSlot = hashMapSlot{&hashMapNil}
 )

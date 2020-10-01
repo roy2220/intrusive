@@ -106,7 +106,7 @@ func TestRBTreeRemoveNode(t *testing.T) {
 		},
 	} {
 		rbt := new(intrusive.RBTree).Init(orderRBTreeNodeOfRecord, compareRBTreeNodeOfRecrod)
-		rs := [6]recordOfRBTree{}
+		var rs [6]recordOfRBTree
 		for i := range rs {
 			r := &rs[i]
 			r.Value = i + 1
@@ -146,7 +146,7 @@ func TestRBTreeFindNode(t *testing.T) {
 		},
 	} {
 		rbt := new(intrusive.RBTree).Init(orderRBTreeNodeOfRecord, compareRBTreeNodeOfRecrod)
-		rs := [6]recordOfRBTree{}
+		var rs [6]recordOfRBTree
 		for i := range rs {
 			r := &rs[i]
 			r.Value = i + 1
@@ -176,7 +176,7 @@ func TestRBTreeGetMinMaxNodeGetPrevNext(t *testing.T) {
 	assert.False(t, ok)
 	_, ok = rbt.GetMax()
 	assert.False(t, ok)
-	rs := [100]recordOfRBTree{}
+	var rs [100]recordOfRBTree
 	for i := range rs {
 		r := &rs[i]
 		r.Value = i + 1
@@ -194,7 +194,7 @@ func TestRBTreeGetMinMaxNodeGetPrevNext(t *testing.T) {
 		_, ok = max.GetPrev(rbt)
 		assert.True(t, ok)
 	}
-	i := 0
+	var i int
 	for rbtn, ok := rbt.GetMin(); ok; rbtn, ok = rbtn.GetNext(rbt) {
 		assert.Equal(t, &rs[i].RBTreeNode, rbtn)
 		i++
@@ -210,7 +210,7 @@ func TestRBTreeGetMinMaxNodeGetPrevNext(t *testing.T) {
 
 func TestRBTree(t *testing.T) {
 	rbt := new(intrusive.RBTree).Init(orderRBTreeNodeOfRecord, compareRBTreeNodeOfRecrod)
-	rs := [100000]recordOfRBTree{}
+	var rs [100000]recordOfRBTree
 	for i := range rs {
 		rs[i].Value = i + 1
 	}
@@ -264,12 +264,12 @@ func compareRBTreeNodeOfRecrod(node *intrusive.RBTreeNode, value interface{}) in
 }
 
 func dumpRecordRBTree(rbTree *intrusive.RBTree) string {
-	buffer := bytes.NewBuffer(nil)
+	var buffer bytes.Buffer
 
 	for it := rbTree.Foreach(); !it.IsAtEnd(); it.Advance() {
 		record := (*recordOfRBTree)(it.Node().GetContainer(unsafe.Offsetof(recordOfRBTree{}.RBTreeNode)))
 		record.RBTreeNode = intrusive.RBTreeNode{} // destry the tree
-		fmt.Fprintf(buffer, "%v,", record.Value)
+		fmt.Fprintf(&buffer, "%v,", record.Value)
 	}
 
 	if n := buffer.Len(); n >= 1 {
@@ -281,12 +281,12 @@ func dumpRecordRBTree(rbTree *intrusive.RBTree) string {
 }
 
 func dumpReverseRecordRBTree(rbTree *intrusive.RBTree) string {
-	buffer := bytes.NewBuffer(nil)
+	var buffer bytes.Buffer
 
 	for it := rbTree.ForeachReverse(); !it.IsAtEnd(); it.Advance() {
 		record := (*recordOfRBTree)(it.Node().GetContainer(unsafe.Offsetof(recordOfRBTree{}.RBTreeNode)))
 		record.RBTreeNode = intrusive.RBTreeNode{} // destry the tree
-		fmt.Fprintf(buffer, "%v,", record.Value)
+		fmt.Fprintf(&buffer, "%v,", record.Value)
 	}
 
 	if n := buffer.Len(); n >= 1 {
