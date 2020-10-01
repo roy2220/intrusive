@@ -87,7 +87,7 @@ func TestHeapRemoveNode(t *testing.T) {
 		},
 	} {
 		h := new(intrusive.Heap).Init(orderHeapNodeOfRecord, 6)
-		rs := [6]recordOfHeap{}
+		var rs [6]recordOfHeap
 		for i := range rs {
 			r := &rs[i]
 			r.Value = i + 1
@@ -106,7 +106,7 @@ func TestHeapRemoveNode(t *testing.T) {
 
 func TestHeap(t *testing.T) {
 	h := new(intrusive.Heap).Init(orderHeapNodeOfRecord, 0)
-	rs := [100000]recordOfHeap{}
+	var rs [100000]recordOfHeap
 	for i := range rs {
 		rs[i].Value = i + 1
 	}
@@ -161,7 +161,7 @@ func orderHeapNodeOfRecord(node1 *intrusive.HeapNode, node2 *intrusive.HeapNode)
 }
 
 func dumpRecordHeap(heap *intrusive.Heap) string {
-	buffer := bytes.NewBuffer(nil)
+	var buffer bytes.Buffer
 
 	for {
 		heapTop, ok := heap.GetTop()
@@ -172,7 +172,7 @@ func dumpRecordHeap(heap *intrusive.Heap) string {
 
 		record := (*recordOfHeap)(heapTop.GetContainer(unsafe.Offsetof(recordOfHeap{}.HeapNode)))
 		heap.RemoveNode(&record.HeapNode)
-		fmt.Fprintf(buffer, "%v,", record.Value)
+		fmt.Fprintf(&buffer, "%v,", record.Value)
 	}
 
 	if n := buffer.Len(); n >= 1 {

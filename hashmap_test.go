@@ -86,7 +86,7 @@ func TestHashMapRemoveNode(t *testing.T) {
 		},
 	} {
 		hm := new(intrusive.HashMap).Init(0, hashKey, matchHashMapNodeOfRecord)
-		rs := [6]recordOfHashMap{}
+		var rs [6]recordOfHashMap
 		for i := range rs {
 			r := &rs[i]
 			r.Value = i + 1
@@ -120,7 +120,7 @@ func TestHashMapFindNode(t *testing.T) {
 		},
 	} {
 		hm := new(intrusive.HashMap).Init(0, hashKey, matchHashMapNodeOfRecord)
-		rs := [6]recordOfHashMap{}
+		var rs [6]recordOfHashMap
 		for i := range rs {
 			r := &rs[i]
 			r.Value = i + 1
@@ -144,7 +144,7 @@ func TestHashMapFindNode(t *testing.T) {
 
 func TestHashMap(t *testing.T) {
 	hm := new(intrusive.HashMap).Init(0, hashKey, matchHashMapNodeOfRecord)
-	rs := [100000]recordOfHashMap{}
+	var rs [100000]recordOfHashMap
 	for i := range rs {
 		rs[i].Value = i + 1
 	}
@@ -199,7 +199,7 @@ func matchHashMapNodeOfRecord(hashMapNode *intrusive.HashMapNode, key interface{
 
 func dumpRecordHashMap(hashMap *intrusive.HashMap) string {
 	vs := make([]int, hashMap.NumberOfNodes())
-	i := 0
+	var i int
 
 	for it := hashMap.Foreach(); !it.IsAtEnd(); it.Advance() {
 		record := (*recordOfHashMap)(it.Node().GetContainer(unsafe.Offsetof(recordOfHashMap{}.HashMapNode)))
@@ -209,10 +209,10 @@ func dumpRecordHashMap(hashMap *intrusive.HashMap) string {
 	}
 
 	sort.Ints(vs)
-	buffer := bytes.NewBuffer(nil)
+	var buffer bytes.Buffer
 
 	for _, v := range vs {
-		fmt.Fprintf(buffer, "%v,", v)
+		fmt.Fprintf(&buffer, "%v,", v)
 	}
 
 	if n := buffer.Len(); n >= 1 {
